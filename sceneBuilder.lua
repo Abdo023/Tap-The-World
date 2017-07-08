@@ -11,6 +11,8 @@ function Class.createScroll(  )
     return scrollView
 end
 
+
+
 -- populates building btns
 function Class.populateBtns ( scroll, dataTable, btnTable )
     tempTable = dataTable

@@ -3,11 +3,10 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 
 local widget = require ("widget")
-local u = require( "utils")
-local anims = require( "animations")
+local u = require( "Utils")
 local sb = require( "sceneBuilder")
 local ui = require( "ui" )
-local bBtn = require( "buildingBtn" )
+local anims = require( "animations")
 local data = require( "data" )
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
@@ -15,86 +14,22 @@ local data = require( "data" )
 -- -----------------------------------------------------------------------------------
 
 -- Variables
-local runTime = 0 -- for deltaTime
-local money = 0
-local isDragBtnClicked = false  -- to determine the direction of the drag animation
-local sections = {"Money", "Tech", "Army"}
-local values = {money=0, tech=0, army=0}
-local bBuildings = data.businessBuildings  -- Store Buildings data (price, name, etc) from data lib
-local tBuildings = data.techBuildings
-local aBuildings = data.armyBuildings  
+local tech = 0
+local isDragBtnClicked = false
+local tBuildings = data.techBuildings 
 -- UI
-local btnsGroup  -- to hold the rect & the building btns
-local tapRect -- the area where the player taps
-local dragBtn    -- the btn which will move the group
-local moneyLabel, techLabel, armyLabel
-local bBtns, tBtns, aBtns = {}, {}, {}
-local purchasedBtns = {}
+local moneyLabel
+local tBtns = {}
+local dragBtn 
 
-local currentSection = "businessScene"
-
--- Functions
-local function getDT (  )
-    local temp = system.getTimer( )
-    local dt = (temp-runTime) / (1000/60)
-    runTime = temp
-    return dt
-end
-
-local function addValue (key, amount)
-    values[key] = values[key] + amount
-    print( values[key]  )
-    --moneyLabel.text = "Money: "..money
-    --data.addResource("money", money)
+local function addMoney ()
+    tech = tech + 1
+    moneyLabel.text = "Tech: "..tech
+    data.addResource("tech", tech)
 end
 
 local function tap( event )
-    if (currentSection == "businessScene") then
-        addValue("money", 1)
-    elseif (currentSection == "techScene") then
-        addValue("tech", 1)
-    elseif (currentSection == "armyScene") then
-        addValue("army", 1)
-    end
-    --checkBuildingPrice ()
-end
-
-local function checkBuildingPrice ()
-    for i=1,#bBuildings do
-        if (money >= bBuildings[i].price) then
-            print( bBuildings[i].name.." Can be built" )
-            bBtns[i]:setEnabled( true )
-            bBtns[i].bar.isVisible = true
-            bBtns[i].frame.isVisible = true
-        end
-    end
-end
-
-function generate( btnTable, dataTable, dt )
-    if (btnTable == nil) then
-        print( "Empty" )
-        return
-    end
-    for i=1,#btnTable do
-        if (btnTable[i].purchased == true) then
-            if (btnTable[i].bar.width >= btnTable[i].bar.oWidth) then
-            btnTable[i].bar.width = 0
-            addMoney(dataTable[i].rev)
-        end
-        btnTable[i].bar.width = btnTable[i].bar.width + 1 * (dataTable[i].time / 1000) * dt
-        end
-
-    end
-end
-
-function btnPressed( event )
-    local btn = event.target
-    btn.purchased = true
-    btn.moneyTxt.text = "Rev: "..bBuildings[btn.id].rev
-end
-
-function loadSectionData( section )
-    currentSection = section
+    addMoney()
 end
 
 function dragUp(  )
@@ -110,14 +45,9 @@ function dragUp(  )
     end
 end
 
--- For animating the bars and generating the money
-function enterFrame( event )
-    local dt = getDT()
-    generate(bBtns, bBuildings, dt)
-    generate(tBtns, tBuildings, dt)
-    generate(aBtns, aBuildings, dt)
+function timerTest(  )
+    timer.performWithDelay( 1000, function() print( "Test" ) end, 0 )
 end
-
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
@@ -127,15 +57,9 @@ function scene:create( event )
 
     local sceneGroup = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
+
     btnsGroup = display.newGroup( )
     sceneGroup:insert( btnsGroup )
-
-    local x = u.sW/3
-    for i=1,3 do
-        local label = ui.statLabel(sections[i])
-        label.x = (x*i) - (x/2)
-        label.y = 100
-    end
 
     local scrollView = sb.createScroll()
     btnsGroup:insert( scrollView )
@@ -146,12 +70,10 @@ function scene:create( event )
     dragBtn.y = scrollView.y - (scrollView.height*0.5) - (dragBtn.height * 0.5)
     btnsGroup:insert( dragBtn )
 
-    btnsGroup.y = u.cY
-    -- Populate the buildings btns
-    local btns = sb.populateBtns(scrollView, bBuildings, bBtns)
+    btnsGroup.y = u.sH - 180
 
-
-    Runtime:addEventListener( "enterFrame", enterFrame )
+    local btns = sb.populateBtns(scrollView, tBuildings, tBtns)
+    --timerTest()
 end
 
 

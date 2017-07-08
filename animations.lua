@@ -13,16 +13,31 @@ function A.dragUp( obj, y, time )
 function A.slideAnim( obj, dir, time )
 	
 	function left( ... )
+		local x
+		if (obj.x > u.cX) then
+			x = u.cX
+		else
+			x= -obj.width*0.5
+		end
+
 		local options = {
-			x= -obj.width*2,
+		
+			x=x,
 			time= time,
 		}
 		transition.to (obj, options)
 	end
 
 	function right(  )
+		local x
+		if (obj.x < u.cX) then
+			x = u.cX
+		else
+			x= u.sW + (obj.width*0.5)
+		end
+
 		local options = {
-			x= obj.width*2,
+			x= x,
 			time= time,
 		}
 		transition.to (obj, options)
